@@ -9,6 +9,7 @@ resource "google_compute_disk" "persistent" {
   size  = 10
   type  = "pd-ssd"
   zone  = "us-central1-a"
+  project = "qwiklabs-gcp-00-fd1b34daa3bd"
 }
 
 resource "google_compute_image" "example" {
