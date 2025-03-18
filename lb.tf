@@ -41,8 +41,49 @@ resource "google_compute_backend_service" "default" {
   }
 }
 
-resource "google_compute_instance_group" "default" {
-  name = "cepf-infra-lb-instance-group"
-  zone = "europe-west4"
-  project = "qwiklabs-gcp-00-fd1b34daa3bd"
+resource "google_compute_health_check" "autohealing" {
+  name                = "autohealing-health-check"
+  check_interval_sec  = 5
+  timeout_sec         = 5
+  healthy_threshold   = 2
+  unhealthy_threshold = 10 # 50 seconds
+
+  http_health_check {
+    request_path = "/healthz"
+    port         = "8080"
+  }
+}
+
+resource "google_compute_region_instance_group_manager" "cepf-infra-lb-group1-mig" {
+  name = "cepf-infra-lb-group1-mig"
+
+  base_instance_name         = "app"
+  region                     = "us-central1"
+  distribution_policy_zones  = ["us-central1-a", "us-central1-f"]
+
+  version {
+    instance_template = google_compute_instance_template.cepf-infra-lb-group1-mig.self_link_unique
+  }
+
+  all_instances_config {
+    metadata = {
+      metadata_key = "metadata_value"
+    }
+    labels = {
+      label_key = "label_value"
+    }
+  }
+
+  target_pools = [google_compute_target_pool.cepf-infra-lb-group1-mig.id]
+  target_size  = 2
+
+  named_port {
+    name = "custom"
+    port = 8888
+  }
+
+  auto_healing_policies {
+    health_check      = google_compute_health_check.autohealing.id
+    initial_delay_sec = 300
+  }
 }
