@@ -1,9 +1,18 @@
-resource "google_compute_image" "default" {
-  name                   = "debian-11-image-template-uiuuiuiiu"
-  project                =  "qwiklabs-gcp-00-fd1b34daa3bd"
-  family                 = "debian-11"
-  raw_disk {
-    source = "https://storage.googleapis.com/gce-uefi-images/debian-11/debian-11.tar.gz"
-  }
+data "google_compute_image" "debian" {
+  family  = "debian-11"
+  project = "debian-cloud"
 }
 
+resource "google_compute_disk" "persistent" {
+  name  = "example-disk"
+  image = data.google_compute_image.debian.self_link
+  size  = 10
+  type  = "pd-ssd"
+  zone  = "us-central1-a"
+}
+
+resource "google_compute_image" "example" {
+  name = "example-image"
+
+  source_disk = google_compute_disk.persistent.id
+}

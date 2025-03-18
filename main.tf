@@ -1,16 +1,3 @@
-resource "google_storage_bucket" "default" {
-  name     = "qwiklabs-gcp-00-fd1b34daa3bd-bucket-tfstate"
-  location = "US"
-
-  force_destroy               = false
-  public_access_prevention    = "enforced"
-  uniform_bucket_level_access = true
-
-  versioning {
-    enabled = true
-  }
-}
-
 resource "local_file" "default" {
   file_permission = "0644"
   filename        = "backend.tf"
@@ -21,7 +8,7 @@ resource "local_file" "default" {
   content = <<-EOT
   terraform {
     backend "gcs" {
-      bucket = "${google_storage_bucket.default.name}"
+      bucket = "qwiklabs-gcp-00-fd1b34daa3bd-bucket-tfstate"
     }
   }
   EOT
